@@ -4,12 +4,13 @@
 # wykorzystując warunek logiczny wyświetlić prawidłowy tekst "Liczba parzysta" /
 # "Liczba nieparzysta"
 
-def isEven(number:int)->bool:
-    return number%2==0
+
+def isEven(number: int) -> bool:
+    return number % 2 == 0
+
 
 result = isEven(9)
-if(result):
+if result:
     print("Parzysta")
 else:
     print("Nieparzysta")
-
