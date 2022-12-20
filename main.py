@@ -5,10 +5,12 @@ from flask import Flask, jsonify, request, Response
 from flask_restful import Api, Resource
 import numpy
 import cv2 as cv
+from person_detection_service import PersonDetectionService
 
 app = Flask(__name__)
 api = Api(app)
 
+pd_service = PersonDetectionService()
 
 @app.route('/')
 def index():
@@ -23,13 +25,11 @@ def detect():
     image = request.files['image']
     if not is_photo(image.filename):
         return 'File must be a type of image', 400
+    pd_service.processImage(image.read())
     # convert string data to numpy array
-    file_bytes = numpy.fromstring(image.read(), numpy.uint8)
+    # file_bytes = numpy.fromstring(image.read(), numpy.uint8)
     # convert numpy array to image
-    img = cv.imdecode(file_bytes, cv.IMREAD_UNCHANGED)
-    cv.imshow('image', img)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    # img = cv.imdecode(file_bytes, cv.IMREAD_UNCHANGED)
     # print(img)
     # print(is_photo(image.filename))
     # print(type(image))
