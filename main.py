@@ -3,6 +3,8 @@
 import json
 from flask import Flask, jsonify, request, Response
 from flask_restful import Api, Resource
+import numpy
+import cv2 as cv
 
 app = Flask(__name__)
 api = Api(app)
@@ -21,10 +23,18 @@ def detect():
     image = request.files['image']
     if not is_photo(image.filename):
         return 'File must be a type of image', 400
-    print(is_photo(image.filename))
-    print(type(image))
-    print(image.filename)
-    print(image.stream.read())
+    # convert string data to numpy array
+    file_bytes = numpy.fromstring(image.read(), numpy.uint8)
+    # convert numpy array to image
+    img = cv.imdecode(file_bytes, cv.IMREAD_UNCHANGED)
+    cv.imshow('image', img)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+    # print(img)
+    # print(is_photo(image.filename))
+    # print(type(image))
+    # print(image.filename)
+    # print(image.stream.read())
     return jsonify({"status": "ok"})
 
 
