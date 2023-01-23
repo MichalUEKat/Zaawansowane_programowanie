@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+    body{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: #0d1b2a;
+    }
+    .formWrapper{
+        width: 100%;
+        height: 20%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .formWrapper form{
+        display: flex;
+        max-height: 70%;
+        height: 100%;
+        flex-direction: column;
+        justify-content: space-between;
+        /* align-items: flex-end; */
+        align-items: center;
+    }
+    .formWrapper form button{
+        width: 100px;
+        height: 40px;
+        background-color: transparent;
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+        color: #e0e1dd;
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        letter-spacing: 1px;
+        border: 1px solid #e0e1dd;
+        transition: 0.2s;
+        cursor: pointer;
+        
+    }
+    .formWrapper form button:hover{
+        background-color: #1b263b;
+    }
+    .formWrapper form button:disabled{
+        background-color: gray;
+    }
+
+    .formWrapper form .imageInput{
+        color:#e0e1dd ;
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+    }
+
+    .formWrapper form .imageInput::-webkit-file-upload-button{
+        /* visibility: hidden; */
+        display: none;
+    }
+
+    .formWrapper form .imageInput::before {
+        content: 'Wybierz zdjęcie';
+        display: inline-block;
+        background: linear-gradient(top, #f9f9f9, #e3e3e3);
+        border: 1px solid #e0e1dd ;
+        border-radius: 3px;
+        padding: 5px 8px;
+        outline: none;
+        white-space: nowrap;
+        /* -webkit-user-select: none; */
+        cursor: pointer;
+        /* text-shadow: 1px 1px #fff; */
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .formWrapper form .imageInput:hover::before{
+        /* border-color: black; */
+        background-color:#1b263b ;
+    }
+
+    .formWrapper form .imageInput:active::before{
+        background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+    }
+
+    .responseContainer{
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 1%;
+        overflow: hidden;
+    }
+    .responseContainer .header{
+        height: 10%;
+        width: 100%;
+        text-align: center;
+        text-transform: uppercase;
+        font-family: 'Roboto', sans-serif;
+        letter-spacing: 1px;
+        color: #e0e1dd;
+    }
+
+    .responseContainer .imageContainer{
+        height: 90%;
+        width: 100%;
+        text-align: center;
+    }
+    .responseContainer .imageContainer img{
+        max-height: 100%;
+        max-width: 100%;
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    }
+    #spinner:not([hidden]) {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #spinner::after {
+        content: "";
+        width: 80px;
+        height: 80px;
+        border: 2px solid #f3f3f3;
+        border-top: 3px solid #f25a41;
+        border-radius: 100%;
+        will-change: transform;
+        animation: spin 1s infinite linear
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+<body>
+    <div class="formWrapper">
+        <form>
+            <input type="file" id="image-file" class="imageInput" accept="image/*">
+            <button type="button" disabled id="btnSend" onclick="uploadImage()">Sprawdź</button>
+        </form>
+    </div>
+    <div class="responseContainer" >
+        <div hidden id="spinner"></div>
+        <div class="header"><h2 class="peopleNumber"></h2></div>
+        <div class="imageContainer"><img class="processedImage" src="" alt=""></div>
+        
+    </div>
+    
+      <script>
+        const imageInput = document.getElementById('image-file');
+        const btnSend = document.getElementById('btnSend');
+
+        const handleEmptyFile=()=>{
+            btnSend.disabled = imageInput.files.length!==1;
+        }
+        imageInput.addEventListener("change",handleEmptyFile);
+
+        function uploadImage() {
+            //show spinner
+            const spinner = document.getElementById("spinner");
+            spinner.removeAttribute('hidden');
+
+            const file = document.getElementById('image-file').files[0];
+            const formData = new FormData();
+            formData.append('image',file);
+            fetch("/api/personDetection",{
+                method: "POST",
+                body:formData
+            }).then(response=>response.json())
+            .then(data=>{
+                const img = data.processed_image;
+                const numberOfPeople = data.number_of_people;
+                const image = document.getElementsByClassName('processedImage')[0];
+                const h2 = document.querySelector(".peopleNumber");
+                h2.innerHTML = `Liczba osób na zdjęciu: ${numberOfPeople}`;
+                image.setAttribute("src", "data:image/jpeg;base64," + img);
+
+                //hide spinner
+                spinner.setAttribute('hidden', '');
+            })
+        }
+        </script>
+</body>
+</html>
